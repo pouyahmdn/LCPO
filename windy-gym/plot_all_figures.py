@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange
@@ -32,6 +34,7 @@ def transform_label(label: str):
 # ##################################################### Load results ###################################################
 ########################################################################################################################
 
+os.makedirs('./figures/', exist_ok=True)
 
 trl = np.arange(4)
 list_files = []
