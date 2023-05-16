@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm.notebook import trange
+from tqdm import trange
 import pandas as pd
 import scipy.stats
 
@@ -40,7 +40,10 @@ tags = ['a2c_oracle_eval', 'a2c_continual', 'trpo_oracle_eval', 'trpo_continual'
         'sac_oracle_eval', 'sac_continual', 'lcpo_continual', 'lcpo_d_continual', 'lcpo_p_continual', 'mbcd_continual',
         'mbpo_continual', 'imbpo_continual']
 for tag in tags:
-    list_files.extend([[f'./tests/{tag}_s{sd}_t{tind}/' for sd in range(10)] for tind in trl])
+    if 'oracle' in tag:
+        list_files.extend([[f'./tests/{tag}_s{sd}_t{tind}/' for sd in range(10)] for tind in trl])
+    else:
+        list_files.extend([[f'./tests/{tag}_seed{sd}_trace_ind{tind}/' for sd in range(10)] for tind in trl])
     list_labels.extend([f'{tag}_t{tind}_para' for tind in trl])
 
 assert len(list_labels) == len(list_files)
@@ -53,12 +56,13 @@ for ind in trange(len(list_files)):
         ind_nan = ~np.isnan(extracted)
         extracted = extracted[ind_nan]
         assert len(extracted) > 0
-        if 'trpo' in list_labels[ind] and 'single' in list_labels[ind]:
+        if 'trpo' in list_labels[ind] and 'continual' in list_labels[ind]:
             rate = 16
         else:
             rate = 1
         df_dict = {'reward': extracted, 'time': np.arange(len(extracted)) * rate, 'seed': len(df_list[ind])}
         df_list[ind].append(pd.DataFrame(df_dict))
+
 for i in range(len(df_list)):
     if 'para' in list_labels[i]:
         rew_list = [df['reward'].mean() for df in df_list[i]]
@@ -78,7 +82,7 @@ fig, axes = plt.subplots(2, 4, figsize=(6.75, 2), sharey=True)
 xticks = [[0, 5, 10, 15, 20]] * 2 + [[0, 2, 4, 6, 8]] * 2
 
 for ind, i in enumerate(trl):
-    samples = np.load(f'./tests/ou_tr{i}.npy')
+    samples = np.load(f'./traces/ou_tr{i}.npy')
     len_tot = len(samples) // 2
     wind_1, wind_2 = samples[:len_tot], samples[len_tot:]
 
@@ -150,6 +154,8 @@ for i in range(len(trl)):
         if 'Offline' not in label:
             ax.fill_between(tint * 200 / 1e6, rew + rew_ci, rew - rew_ci, color=color, alpha=0.1, linestyle=lst)
         if row == 0:
+            # The line below is to avoid a warning
+            ax.set_xticks(ax.get_xticks())
             ax.set_xticklabels(['' for k in ax.get_xticks()])
 
         ax.grid()
@@ -217,6 +223,12 @@ for i in range(mean_list.shape[-1]):
 lcpo_ind = [8, 9, 10]
 bases = [1, 3, 5, 7, 11, 12, 13]
 oracs = [0, 2, 4, 6]
+
+label_row = f''
+for k in lcpo_ind:
+    label_row += f' & {transform_label(list_labels[k * len(trl)])}'
+label_row += f' & Best Continual & Best Pre-trained Oracle'
+print(label_row + ' \\\\')
 
 for i in range(mean_list.shape[-1]):
     data_row = np.array([mean_list[k, i] for k in bases])
