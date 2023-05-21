@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange
 import pandas as pd
+import os
 
 plt.rcParams.update({
     "text.usetex": True,
