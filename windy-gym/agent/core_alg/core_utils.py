@@ -4,6 +4,11 @@ import torch
 from neural_net.nn import FullyConnectNN
 
 
+def get_kl(log_pi_old: torch.Tensor, pi_old: torch.Tensor, log_pi_new: torch.Tensor) -> torch.Tensor:
+    kl = (pi_old * (log_pi_old - log_pi_new)).sum(dim=(-1, -2))
+    return kl
+
+
 def get_flat_params_from(model: FullyConnectNN) -> torch.Tensor:
     params = []
     for param in model.parameters():

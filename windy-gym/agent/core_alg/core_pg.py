@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
-from agent.core_alg.core_utils import get_flat_params_from
+from agent.core_alg.core_utils import get_flat_params_from, get_kl
 from neural_net.nn import FullyConnectNN, FCNPolicy
 
 

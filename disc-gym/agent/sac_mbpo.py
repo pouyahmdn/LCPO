@@ -83,7 +83,7 @@ class TrainerNet(TrainerNetSAC):
                 all_fake_acts = self.sample_many_actions(all_states)
                 all_fake_next_states, all_fake_rewards = self.deep_mbpo.predict(all_states, all_fake_acts)
 
-                all_fake_n_rewards = all_fake_rewards / np.sqrt(self.ret_rms.var + 1e-8)
+                all_fake_n_rewards = all_fake_rewards / np.sqrt(self.ret_rms.var + 1)
 
                 # Train SAC
                 pg_loss, v_loss_1, v_loss_2, real_entropy, q_target, q_local_1, q_local_2 = \

@@ -4,17 +4,17 @@ import torch.nn as nn
 import torch.nn.functional as tfunctional
 
 
-def mlp_seq(sizes, activation, output_activation=nn.Identity):
+def mlp_seq(sizes, activation, bias, output_activation=nn.Identity):
     layers = []
     for j in range(len(sizes) - 1):
         act = activation if j < len(sizes) - 2 else output_activation
-        layers += [nn.Linear(sizes[j], sizes[j + 1]), act()]
+        layers += [nn.Linear(sizes[j], sizes[j + 1], bias), act()]
     return nn.Sequential(*layers)
 
 
 class FullyConnectNN(nn.Module):
     def __init__(self, in_size: int, n_hids: List[int], out_size: int, grp_size: int,
-                 act: nn.modules.Module = nn.LeakyReLU, final_layer_act: bool = True):
+                 act: nn.modules.Module = nn.LeakyReLU, final_layer_act: bool = True, bias=True):
         super(FullyConnectNN, self).__init__()
         self.eps = 1e-6
         self.in_size = in_size
@@ -31,7 +31,8 @@ class FullyConnectNN(nn.Module):
         layers.append(self.out_size)
 
         # initialize layer operations
-        self.sequential = mlp_seq(layers, activation=act, output_activation=act if final_layer_act else nn.Identity)
+        self.sequential = mlp_seq(layers, activation=act, output_activation=act if final_layer_act else nn.Identity,
+                                  bias=bias)
 
     @torch.jit.export
     def forward(self, in_vec: torch.Tensor):
@@ -54,6 +55,15 @@ class FCNPolicy(FullyConnectNN):
         # array of shape (1, act_dim, act_bins)
         act = (pi_cpu[0, :, :-1].cumsum(-1) <= torch.rand((self.grp_size, 1))).sum(dim=-1)
         return act
+
+    @torch.jit.export
+    def sample_action_prob(self, obs: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        features = self.forward(obs)
+        log_pi_cpu = tfunctional.log_softmax(features, dim=-1).cpu()
+        pi_cpu = torch.exp(log_pi_cpu)
+        # array of shape (1, act_dim, act_bins)
+        act = (pi_cpu[0, :, :-1].cumsum(-1) <= torch.rand((self.grp_size, 1))).sum(dim=-1)
+        return act, log_pi_cpu[0].gather(-1, act.unsqueeze(-1)).squeeze(dim=-1)
 
     @torch.jit.export
     def max(self, in_vec: torch.Tensor):

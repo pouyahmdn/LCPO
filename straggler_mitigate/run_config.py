@@ -93,7 +93,7 @@
         'common': 'python3 train.py --cont_decay 0.81 --lam 0.95 --lr_rate 1e-3 --reward_scale 1600 '
                   '--agent_type LCPO --trpo_kl_in 1e-1 --trpo_kl_out 1e-4 --trpo_damping 1e-1 '
                   '--entropy_max 1e-2 --entropy_decay 0 --entropy_min 0 --auto_target_entropy 0.1 '
-                  '--master_batch 4608 --num_epochs 4500 ',
+                  '--master_batch 4608 --num_epochs 4500 --ood_subsample 100 ',
         'iterant': [
             {'arg': 'trace_ind', 'val': ['0', '1']},
             {'arg': 'seed', 'val': [f'{i}' for i in range(10)]},
@@ -124,5 +124,17 @@
             {'arg': 'seed', 'val': [f'{i}' for i in range(10)]},
         ],
         'name': 'mbpo_continual'
+    },
+    {
+        'common': 'python3 train.py --cont_decay 0.81 --lam 0.95 --lr_rate 1e-3 --reward_scale 1600 '
+                  '--agent_type EWCPP --off_policy_tau 0.005 '
+                  '--entropy_max 1e-2 --entropy_decay 0 --entropy_min 0 --auto_target_entropy 0.1 '
+                  '--off_policy_batch_size 512 --off_policy_learn_steps 128 --off_policy_random_epochs 1000 '
+                  '--master_batch 128 --num_epochs 162000 --ewc_alpha 0.1 --ewc_gamma 0.99993 ',
+        'iterant': [
+            {'arg': 'trace_ind', 'val': ['0', '1']},
+            {'arg': 'seed', 'val': [f'{s}' for s in range(10)]},
+        ],
+        'name': 'ewcpp_continual'
     },
 ]

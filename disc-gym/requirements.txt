@@ -1,5 +1,9 @@
 numpy~=1.19.2
 termcolor~=1.1.0
-pytorch~=1.7.0
-gym~=0.17.3
+torch~=1.13.1
+torchaudio~=0.13.1
+torchvision~=0.14.1
+protobuf~=3.20.3
+imageio~=2.23.0
+gymnasium~=0.29.1
 tensorboard~=2.11.0

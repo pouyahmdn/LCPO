@@ -27,7 +27,7 @@ parser.add_argument('--skip_tb', action='store_true', help='Skip tensorboard')
 # -- General RL --
 parser.add_argument('--agent_type', type=str, required=True, help='Agent type (required)',
                     choices=['A2C', 'A2C-EVAL', 'DQN', 'DQN-EVAL', 'SAC', 'SAC-EVAL', 'LCPO', 'TRPO', 'SAC-MBCD',
-                             'SAC-MBPO'])
+                             'SAC-MBPO', 'EWCPP'])
 parser.add_argument('--saved_model', type=str, nargs='*', default=None, help='path for saved model (default: None)')
 parser.add_argument('--result_folder', type=str, default='./tests/', help='path for results (default: ./tests/)')
 parser.add_argument('--lr_rate', type=float, required=True, help='learning rate (default: 1e-3)')
@@ -79,9 +79,14 @@ parser.add_argument('--trpo_damping', type=float, default=1e-1, help='TRPO - Con
 
 # -- LCPO --
 parser.add_argument('--lcpo_thresh', type=float, default=-3, help='LCPO threshold (default: -3)')
+parser.add_argument('--ood_subsample', type=int, default=100, help='OOD capacity scale down factor (default: 100)')
 
 # -- MBCD --
 parser.add_argument('--cusum', type=float, default=1000, help='CUSUM for MBCD')
+
+# -- EWCPP --
+parser.add_argument('--ewc_alpha', type=float, default=0.1, help='EWC alpha')
+parser.add_argument('--ewc_gamma', type=float, default=0.99993, help='EWC alpha')
 
 config = parser.parse_args()
 

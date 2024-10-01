@@ -107,7 +107,7 @@ for ind, (arr_rate, arr_size, arr_time) in enumerate(comptraces):
     ax.spines['top'].set_visible(False)
     ax.plot(1, 0, ">k", transform=ax.transAxes, clip_on=False)
     ax.plot(0, 1, "^k", transform=ax.transAxes, clip_on=False)
-    ax.set_title(f'Input {ind + 1}')
+    ax.set_title(f'Context Trace {ind + 1}')
 
     ax = axes[row + 1][col]
     ax.plot(arr_time, ewma(arr_size, 0.999), color='C2')
@@ -136,11 +136,16 @@ plt.savefig('figures/lb_traces.pdf', format='pdf')
 trl = np.arange(2)
 list_files = []
 list_labels = []
-tags = ['eval_a2c_oracle', 'a2c_continual', 'eval_trpo_oracle', 'trpo_continual', 'eval_dqn_oracle', 'dqn_continual',
-        'eval_sac_oracle', 'sac_continual', 'lcpo_continual_ablation_trace_ind%d_seed%d_lcpo_thresh-5',
+tags = ['eval_a2c_oracle', 'a2c_continual',
+        'eval_trpo_oracle', 'trpo_continual',
+        'eval_dqn_oracle', 'dqn_continual',
+        'eval_sac_oracle', 'sac_continual',
+
+        'lcpo_continual_ablation_trace_ind%d_seed%d_lcpo_thresh-5',
         'lcpo_continual_ablation_trace_ind%d_seed%d_lcpo_thresh-6',
         'lcpo_continual_ablation_trace_ind%d_seed%d_lcpo_thresh-7',
-        'mbcd_continual', 'mbpo_continual']
+
+        'mbcd_continual', 'mbpo_continual', 'ewcpp_continual']
 for tag in tags:
     if tag.startswith('lcpo_continual_ablation'):
         list_files.extend([f'./tests/{tag % (tind, sd)}/' for tind in trl for sd in range(10)])
@@ -159,11 +164,14 @@ labels = [
     'DQN',
     'Oracle SAC',
     'SAC',
+
     'LCPO -5',
     'LCPO -6',
     'LCPO -7',
+
     'MBCD',
     'MBPO',
+    'Online EWC'
 ]
 labels = sum([[label + ' - T0', label + ' - T1'] for label in labels], [])
 
@@ -190,8 +198,8 @@ std_list = np.array(
     [df.groupby(by='seed').mean()['delay'].std() / np.sqrt(df['seed'].nunique() - 1) * t(0.05, df['seed'].nunique() - 1)
      for df in df_list]).reshape((13, 2))
 best_paras = np.argmin(mean_list[[0, 2, 4, 6], :], axis=0)
-best_single = np.argmin(mean_list[[1, 3, 5, 7, 11, 12], :], axis=0)
-bases = ['A2C', 'TRPO', 'DDQN', 'SAC', 'MBCD', 'MBPO']
+best_single = np.argmin(mean_list[[1, 3, 5, 7, 11, 12, 13], :], axis=0)
+bases = ['A2C', 'TRPO', 'DDQN', 'SAC', 'MBCD', 'MBPO', 'Online EWC']
 
 for i in range(mean_list.shape[-1]):
     row = i % 2
@@ -200,7 +208,7 @@ for i in range(mean_list.shape[-1]):
     for dfi, label, color, lst in zip([i + 10 * mean_list.shape[-1], i + (best_single[i] * 2 + 1) * mean_list.shape[-1],
                                        i + best_paras[i] * 2 * mean_list.shape[-1]],
                                       ['LCPO Cons', f'Best Baseline ({bases[best_single[i]]})',
-                                       f'Oracle ({bases[best_paras[i]]})'],
+                                       f'Prescient ({bases[best_paras[i]]})'],
                                       ['C2', 'C3', 'C9'], ['-', '--', ':']):
         df = df_list[dfi]
         st = (df['time'].max() - df['time'].min()) // 100
@@ -219,7 +227,7 @@ for i in range(mean_list.shape[-1]):
         ax.spines['top'].set_visible(False)
         ax.plot(1, 0, ">k", transform=ax.transAxes, clip_on=False)
         ax.plot(0, 1, "^k", transform=ax.transAxes, clip_on=False)
-        ax.set_title(f'Input {i + 1}')
+        ax.set_title(f'Context Trace {i + 1}')
         ax.legend(ncol=3, loc='lower left', bbox_to_anchor=(-0.03, 1.35, 1.06, 0.2), borderaxespad=0, mode="expand")
 
 fig.supxlabel('Time (hrs)')
@@ -237,14 +245,14 @@ std_list = np.array(
     [df.groupby(by='seed').mean()['delay'].std() / np.sqrt(df['seed'].nunique() - 1) * t(0.05, df['seed'].nunique() - 1)
      for df in df_list]).reshape((13, 2))
 best_paras = np.argmin(mean_list[[0, 2, 4, 6], :], axis=0)
-best_single = np.argmin(mean_list[[1, 3, 5, 7, 11, 12], :], axis=0)
-bases = ['A2C', 'TRPO', 'DDQN', 'SAC', 'MBCD', 'MBPO']
+best_single = np.argmin(mean_list[[1, 3, 5, 7, 11, 12, 13], :], axis=0)
+bases = ['A2C', 'TRPO', 'DDQN', 'SAC', 'MBCD', 'MBPO', 'Online EWC']
 
 i = 0
 for dfi, label, color, lst in zip([i + 10 * mean_list.shape[-1], i + (best_single[i] * 2 + 1) * mean_list.shape[-1],
                                    i + best_paras[i] * 2 * mean_list.shape[-1]],
                                   ['LCPO Cons', f'Best Baseline ({bases[best_single[i]]})',
-                                   f'Oracle ({bases[best_paras[i]]})'],
+                                   f'Prescient ({bases[best_paras[i]]})'],
                                   ['C2', 'C3', 'C9'], ['-', '--', ':']):
     df = df_list[dfi]
     st = (df['time'].max() - df['time'].min()) // 100
@@ -263,7 +271,7 @@ for dfi, label, color, lst in zip([i + 10 * mean_list.shape[-1], i + (best_singl
     ax.spines['top'].set_visible(False)
     ax.plot(1, 0, ">k", transform=ax.transAxes, clip_on=False)
     ax.plot(0, 1, "^k", transform=ax.transAxes, clip_on=False)
-    ax.set_title(f'Input {i + 1}')
+    ax.set_title(f'Context Trace {i + 1}')
     ax.legend(ncol=3, loc='lower left', bbox_to_anchor=(0.25, 1.35, 0.5, 0.2), borderaxespad=0, mode="expand")
 
 fig.supxlabel('Time (hrs)')
@@ -276,7 +284,7 @@ plt.savefig('figures/lb_time_series_only_i1.pdf', format='pdf')
 ########################################################################################################################
 # ################################################# Print table 2 ######################################################
 ########################################################################################################################
-inder = [8, 9, 10, 11, 12, 1, 3, 5, 7, 0, 2, 4, 6]
+inder = [8, 9, 10, 11, 12, 13, 1, 3, 5, 7, 0, 2, 4, 6]
 oracs = [0, 2, 4, 6]
 
 label_row = f''
@@ -290,7 +298,7 @@ for i in range(mean_list.shape[-1]):
     bin_bf[np.argmin(data_row[:-4])] = 1
     bin_bf[-4+np.argmin(data_row[-4:])] = 1
     print('\\midrule')
-    str_row = f'\\multirow{{2}}{{*}}{{Input Trace {i+1}}}'
+    str_row = f'\\multirow{{2}}{{*}}{{Context Trace {i+1}}}'
     for ik, k in enumerate(inder):
         if bin_bf[ik] == True:
             new_add = f'\\textbf{{{mean_list[k, i]:.0f}}}'

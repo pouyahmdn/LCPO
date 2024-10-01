@@ -25,7 +25,7 @@ class TrainerNet(TrainerNetA2C):
         super(TrainerNet, self).__init__(environment, monitor, output_folder)
         self.old_policy_net = torch.jit.script(PermInvNet(self.obs_len, self.act_len,
                                                config.num_servers, self.aux_state).to(self.device))
-        self.ood_buf = OutOfDSampler(self.obs_len, config.master_batch*5, config.master_batch*config.num_epochs,
+        self.ood_buf = OutOfDSampler(self.obs_len+1, config.master_batch*5, config.master_batch*config.num_epochs // config.ood_subsample,
                                      make_func(config.lcpo_thresh))
         self.batch_rng = np.random.RandomState(seed=config.seed)
 
@@ -51,7 +51,7 @@ class TrainerNet(TrainerNetA2C):
               times_np: np.ndarray, dones_np: np.ndarray) -> Tuple[float, float, float, np.ndarray, np.ndarray,
                                                                    np.ndarray, float]:
         new_obs_s = obs_np[obs_np[:, -1] < 0.5]
-        self.ood_buf.add_many_exp(new_obs_s)
+        self.ood_buf.add_many_exp(new_obs_s, self.batch_rng)
         ood_obs = self.ood_buf.get(self.batch_rng, len(obs_np))
         nt = torch.get_num_threads()
         torch.set_num_threads(3)

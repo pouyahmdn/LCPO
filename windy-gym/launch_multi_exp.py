@@ -14,6 +14,7 @@ parser.add_argument('--config_file', type=str, required=True, help='Run configur
 parser.add_argument('--output_dir', type=str, required=True, help='Run output dir')
 parser.add_argument('--print_cmd_only', action='store_true', help='Print commands and exit')
 parser.add_argument('--tail', action='store_true', help='Tail experiments')
+parser.add_argument('--npr', type=int, default=10, help='Tail experiments line count')
 parser.add_argument('--only_running', action='store_true', help='Tail experiments')
 parser.add_argument('--free_lim', type=float, default=-1, help='Minimum hard drive space to start')
 
@@ -126,7 +127,7 @@ def main():
                                           os.path.exists(f"{run['dir']}/log_in_play")):
                 continue
             print_distinct(f'For experiment {run["name"]}:')
-            subprocess.Popen(['tail', '-n', '10', run['dir']+'train.log']).wait()
+            subprocess.Popen(['tail', '-n', f'{args.npr}', run['dir']+'train.log']).wait()
             print()
         exit(0)
 

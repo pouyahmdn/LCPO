@@ -13,6 +13,7 @@ from agent.sac import TrainerNet as SoftActorCritic
 from agent.sac_eval import TrainerNet as SoftActorCriticEval
 from agent.sac_mbcd import TrainerNet as MBCDSoftActorCritic
 from agent.sac_mbpo import TrainerNet as MBPOSoftActorCritic
+from agent.sac_ewcpp import TrainerNet as EWCPPSoftActorCritic
 from agent.dqn import TrainerNet as DeepQLearning
 from agent.dqn_eval import TrainerNet as DeepQLearningEval
 from cenv.load_balance import load_balance_env
@@ -83,6 +84,9 @@ def start_experiment(agent_type, output_folder):
         elif agent_type == 'SAC-MBPO':
             print('Setting up MBPO Baseline..')
             agent = MBPOSoftActorCritic(env, monitor, output_folder)
+        elif agent_type == 'EWCPP':
+            print('Setting up Online EWC..')
+            agent = EWCPPSoftActorCritic(env, monitor, output_folder)
         elif agent_type == 'DQN':
             print('Setting up Deep Q Learning..')
             agent = DeepQLearning(env, monitor, output_folder)

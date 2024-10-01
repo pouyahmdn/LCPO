@@ -164,7 +164,7 @@ class TrainerNet(object):
             all_states, all_next_states, all_actions_np, all_rewards, all_term, all_trunc = self.buff.get()
 
             self.ret_rms.update(np.array(self.ret_list))
-            all_n_rewards = all_rewards / np.sqrt(self.ret_rms.var + 1e-8)
+            all_n_rewards = all_rewards / np.sqrt(self.ret_rms.var + 1)
             # Train A2C
             pg_loss, v_loss, real_entropy, ret_np, v_np, adv_np, log_pi_min = \
                 self.train(all_actions_np, all_next_states, all_n_rewards, all_states, all_term, all_trunc)

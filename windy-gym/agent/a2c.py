@@ -39,8 +39,6 @@ class TrainerNet(object):
         self.policy_net = FCNPolicy(self.obs_len, nn_hids, self.act_len * self.act_bins, self.act_len, act=nn.ReLU,
                                     final_layer_act=False)
         self.policy_net = torch.jit.script(self.policy_net).to(self.device)
-        # self.policy_net = TabularPolicy(self.obs_len, nn_hids, self.act_len * self.act_bins, self.act_len, act=nn.ReLU,
-        #                                 final_layer_act=False)
         self.value_net = FullyConnectNN(self.obs_len, nn_hids, 1, 1, act=nn.ReLU, final_layer_act=False)
         self.value_net = torch.jit.script(self.value_net).to(self.device)
 
@@ -52,11 +50,6 @@ class TrainerNet(object):
         self.entropy_max = entropy_max
         self.entropy_decay = entropy_decay
         self.entropy_min = entropy_min
-
-        # self.multi_select = get_multi_select(2, self.env.MAX_WINDOW_SIZE * batch_size, self.job_gen)
-        # self.prev_ents = {}
-        # self.prev_state_dicts = {}
-        # self.explored = [self.multi_select.initial_model()]
 
         self.net_opt_p = torch.optim.Adam(self.policy_net.parameters(), lr=lr_rate, weight_decay=1e-4, eps=1e-5)
         self.net_opt_p_lr = lr_rate
@@ -177,7 +170,7 @@ class TrainerNet(object):
             all_states, all_next_states, all_actions_np, all_rewards, all_term, all_trunc = self.buff.get()
 
             self.ret_rms.update(np.array(self.ret_list))
-            all_n_rewards = all_rewards / np.sqrt(self.ret_rms.var + 1e-8)
+            all_n_rewards = all_rewards / np.sqrt(self.ret_rms.var + 1)
             # Train A2C
             pg_loss, v_loss, real_entropy, ret_np, v_np, adv_np, log_pi_min = \
                 self.train(all_actions_np, all_next_states, all_n_rewards, all_states, all_term, all_trunc)
@@ -215,6 +208,9 @@ class TrainerNet(object):
         # self.env.seed(self.seed)
         obs, _ = self.env_eval.reset()
         self.buff_eval.reset_head()
+        self.buff_eval.reset_episode()
+        self.buff_eval.len_roll = 0
+        self.buff_eval.rew_roll = 0
         last_time = time.time()
 
         # training process

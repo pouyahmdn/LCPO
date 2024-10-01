@@ -211,6 +211,7 @@ class MBCD:
         self.max_std = max_std
         self.num_stds = num_stds
         self.min_steps = 5000
+        self.max_models = 6
         self.changed = False
         self.step = 0
 
@@ -304,12 +305,15 @@ class MBCD:
             changed = True
             self.memory.remove_last_n(n=100) # Remove last experiences, as they may be from different context
 
-            if maxm == self.S[-1]:  # New Model
+            if maxm == self.S[-1] and self.num_models <= self.max_models:  # New Model
                 newm = self.new_model()
                 self.set_model(newm, load_params_from_init_model=True)
             else:
+                dt = self.S[-1]
+                del self.S[-1]
                 newm = max(self.S, key=lambda key: self.S[key])
                 self.set_model(newm)
+                self.S[-1] = dt
 
         self.changed = changed
         self.step += 1
@@ -340,4 +344,3 @@ class MBCD:
 
     def add_experience(self, obs, actions, rewards, next_obs, dones):
         self.memory.push(obs, actions, rewards, next_obs, dones)
-

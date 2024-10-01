@@ -10,10 +10,14 @@ def get_params():
     parser.add_argument('--device', type=str, default='cpu', help='torch device')
     parser.add_argument('--skip_tb', action='store_true', help='Skip Tensorboard logging')
 
-    # -- WindyCheetah --
+    # -- WindyGym --
     parser.add_argument('--dataset_folder', type=str, default='./traces/',
                         help='The wind trace dataset folder')
     parser.add_argument('--trace_ind', type=int, default=0, help='Trace index to use (default: 0)')
+    parser.add_argument('--env', type=str, required=True,
+                        choices=['pend', 'inv_pend', 'inv_d_pend', 'reacher', 'hopper', 'mountain_car',
+                                 'lunar_lander'],
+                        help='Trace index to use (default: 0)')
 
     # -- Learning --
     parser.add_argument('--saved_model', type=str, nargs='*', default=None, help='path for saved model (default: None)')
@@ -32,8 +36,8 @@ def get_params():
                         help='td lambda factor (default: 0.95)')
     parser.add_argument('--num_epochs', type=int, default=100000,
                         help='number of epochs (default: 100000)')
-    parser.add_argument('--save_interval', type=int, default=100,
-                        help='model saving interval (default: 100)')
+    parser.add_argument('--save_interval', type=int, default=1000,
+                        help='model saving interval (default: 1000)')
     parser.add_argument('--eval_interval', type=int, default=1000,
                         help='model evaluation interval (default: 1000)')
     parser.add_argument('--n_hid', type=int, default=[256, 256],
@@ -69,6 +73,10 @@ def get_params():
                             'DQN-EVAL',
                             'SAC-EVAL',
                             'MBPO-PARA',
+                            'EWCPP',
+                            'SLIDEOGD',
+                            'CLEAR',
+                            'BFDDQN',
                         ]
                         )
 
@@ -102,6 +110,9 @@ def get_params():
     parser.add_argument('--lcpo_thresh', type=float, default=-9, help='LCPO - MVGL threshold (default: -9)')
     parser.add_argument('--trpo_dual', action='store_true', help='TRPO - Solve dual constraint problem')
     parser.add_argument('--lcppo_kappa', type=float, default=1, help='LCPPO - Kappa (default: 1)')
+    parser.add_argument('--ood_subsample', type=int, default=1, help='OOD capacity scale down factor (default: 1)')
+    parser.add_argument('--lcpo_ood_type', type=str, default='l2', choices=['l2', 'mahala', 'mahala_full'],
+                        help='OOD distance metric (default: l2)')
 
     # -- MBCD --
     parser.add_argument('--mbcd_cusum', type=float, default=1000, help='CUSUM for MBCD')
@@ -109,6 +120,25 @@ def get_params():
     # -- MBPO --
     parser.add_argument('--mbpo_warm_up', type=int, default=1000, help='MBPO warm up epochs')
     parser.add_argument('--use_oracle_mbpo', action='store_true', help='Use oracle model')
+
+    # -- EWC++ --
+    parser.add_argument('--ewc_alpha', type=float, default=1, help='EWC alpha')
+    parser.add_argument('--ewc_gamma', type=float, default=0.999, help='EWC gamma')
+
+    # -- Sliding OGD --
+    parser.add_argument('--ogd_alpha', type=float, default=1e-3, help='OGD learning rate')
+    parser.add_argument('--ogd_n', type=int, default=100, help='OGD window size')
+
+    # -- CLEAR --
+    parser.add_argument('--clear_c', type=float, default=1, help='C in V-Trace')
+    parser.add_argument('--clear_rho', type=float, default=1, help='Rho in V-Trace')
+    parser.add_argument('--policy_clone_coeff', type=float, default=0.001, help='Policy cloning mix')
+    parser.add_argument('--value_clone_coeff', type=float, default=0.01, help='Value cloning mix')
+
+    # -- BFDDQN --
+    parser.add_argument('--bf_n', type=int, default=30, help='Benna Fusi Containers')
+    parser.add_argument('--bf_g', type=float, default=0.1, help='g_1_2')
+    parser.add_argument('--bf_buff_len', type=int, default=2000, help='Benna Fusi Experience Replay buffer length')
 
     config = parser.parse_args()
 

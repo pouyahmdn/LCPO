@@ -199,7 +199,7 @@ class TrainerNet(object):
             all_states, all_next_states, all_actions_np, all_rewards, all_term, all_trunc = \
                 self.buff.get_batch(self.batch_rng, self.batch_size)
 
-            all_n_rewards = all_rewards / np.sqrt(self.ret_rms.var + 1e-8)
+            all_n_rewards = all_rewards / np.sqrt(self.ret_rms.var + 1)
 
             # Train SAC
             pg_loss, v_loss_1, v_loss_2, real_entropy, q_target, q_local_1, q_local_2 = \
@@ -240,6 +240,9 @@ class TrainerNet(object):
         # self.env.seed(self.seed)
         obs, _ = self.env_eval.reset()
         self.buff_eval.reset_head()
+        self.buff_eval.reset_episode()
+        self.buff_eval.len_roll = 0
+        self.buff_eval.rew_roll = 0
         last_time = time.time()
 
         pre_rc = self.rand_countdown

@@ -34,7 +34,7 @@ Ensure you have ~103 GiB of free space. Then, run the following command:
 ```
 python3 launch_multi_exp.py --gpu_avail_ind -1 --job_per_gpu 32 --config_file ./run_config.py --output_dir ./tests/ --free_lim 103
 ```
-This script will run 260 experiments in 32 parallel streams. The results are saved in `./tests/`.
+This script will run 280 experiments in 32 parallel streams. The results are saved in `./tests/`.
 
 ---
 ## 3. Plot results

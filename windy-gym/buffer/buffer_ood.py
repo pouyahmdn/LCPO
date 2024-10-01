@@ -14,7 +14,6 @@ class OutOfDSampler(object):
 
         # buffer head
         self.num_samples_so_far = 0
-        self.i_fifo = 0
         self.i_win = 0
 
     def get(self, rng: np.random.RandomState, batch_size: int) -> List[np.ndarray]:
@@ -34,27 +33,36 @@ class OutOfDSampler(object):
         else:
             return []
 
-    def add_exp(self, state: np.ndarray):
-        self.states_fifo[self.i_fifo] = state
-        self.i_fifo = (self.i_fifo + 1) % self.cap
+    def add_exp(self, state: np.ndarray, rng: np.random.RandomState):
+        # Reservoir Sampling
+        if self.num_samples_so_far < self.cap:
+            self.states_fifo[self.num_samples_so_far] = state
+        else:
+            idx = rng.choice(self.num_samples_so_far + 1)
+            if idx < self.cap:
+                self.states_fifo[idx] = state
         self.recent_states[self.i_win] = state
         self.i_win = (self.i_win + 1) % self.win
         self.num_samples_so_far += 1
 
-    def add_many_exp(self, states: np.ndarray):
-        if self.i_fifo + len(states) <= self.cap:
-            self.states_fifo[self.i_fifo: self.i_fifo+len(states)] = states
+    def add_many_exp(self, states: np.ndarray, rng: np.random.RandomState):
+        # Reservoir Sampling
+        if self.num_samples_so_far + len(states) <= self.cap:
+            self.states_fifo[self.num_samples_so_far: self.num_samples_so_far + len(states)] = states
         else:
-            self.states_fifo[self.i_fifo:] = states[:self.cap-self.i_fifo]
-            self.states_fifo[:len(states)+self.i_fifo-self.cap] = states[self.cap-self.i_fifo:]
-        self.i_fifo = (self.i_fifo + len(states)) % self.cap
+            for i in range(len(states)):
+                if self.num_samples_so_far + i < self.cap:
+                    self.states_fifo[self.num_samples_so_far + i] = states[i]
+                else:
+                    idx = rng.choice(self.num_samples_so_far + i + 1)
+                    if idx < self.cap:
+                        self.states_fifo[idx] = states[i]
 
         if self.i_win + len(states) <= self.win:
-            self.recent_states[self.i_win: self.i_win+len(states)] = states
+            self.recent_states[self.i_win: self.i_win + len(states)] = states
         else:
-            self.recent_states[self.i_win:] = states[:self.win-self.i_win]
-            self.recent_states[:len(states)+self.i_win-self.win] = states[self.win-self.i_win:]
+            self.recent_states[self.i_win:] = states[:self.win - self.i_win]
+            self.recent_states[:len(states) + self.i_win - self.win] = states[self.win - self.i_win:]
         self.i_win = (self.i_win + len(states)) % self.win
 
         self.num_samples_so_far += len(states)
-

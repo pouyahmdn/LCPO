@@ -1,9 +1,13 @@
-import gym
-from gym import Wrapper
+from typing import Dict
+
+import gymnasium as gym
+from gymnasium import Wrapper
 import numpy as np
 
 
 class WindyGym(Wrapper):
+    rescale_dict: Dict[int, float] = {}
+
     def __init__(self, env: gym.Env, wind_arr: np.ndarray, bins=9):
         super(WindyGym, self).__init__(env)
         self.action_dim = self.env.action_space.shape[0]
@@ -27,3 +31,15 @@ class WindyGym(Wrapper):
     @staticmethod
     def is_different(data: np.ndarray, base: np.ndarray) -> np.ndarray:
         return np.zeros(len(data), dtype=bool)
+
+    @staticmethod
+    def no_context_obs(obs: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
+
+    @staticmethod
+    def only_context(obs: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
+
+    @property
+    def context_size(self):
+        raise NotImplementedError

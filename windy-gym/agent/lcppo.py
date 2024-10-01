@@ -30,7 +30,7 @@ class TrainerNet(TrainerNetA2C):
               term_np: np.ndarray, trunc_np: np.ndarray) -> Tuple[float, float, float, np.ndarray, np.ndarray,
                                                                   np.ndarray, float]:
         self.para_lr()
-        self.ood_buf.add_many_exp(obs_np)
+        self.ood_buf.add_many_exp(obs_np, self.batch_rng)
         ood_obs = self.ood_buf.get(self.batch_rng, len(obs_np))
         pg_loss, v_loss, real_entropy, ret_np, v_np, log_pi_min, adv_np = \
             train_lcppo(self.value_net, self.policy_net, self.net_opt_p, self.net_opt_v, self.net_loss, self.ood_loss,

@@ -121,7 +121,7 @@ class TrainerNet(TrainerNetSAC):
 
                 gen_states, gen_next_states, gen_acts, gen_rewards, gen_term, gen_trunc = self.buff_gen.get_batch(self.batch_rng, self.batch_size)
 
-                gen_n_rewards = gen_rewards / np.sqrt(self.ret_rms.var + 1e-8)
+                gen_n_rewards = gen_rewards / np.sqrt(self.ret_rms.var + 1)
 
                 # Train SAC
                 pg_loss, v_loss_1, v_loss_2, real_entropy, q_target, q_local_1, q_local_2 = \
