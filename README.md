@@ -4,7 +4,7 @@
 
 LCPO is an online reinforcement learning algorithm tailored for non-stationary context-driven environments. The repository provides implementations and experiments to advance the understanding and performance of agents operating under these challenging conditions.
 
-<p align="center"><img src="results/overview.png" alt="Distribution of GPT-4o one-shot scores" height="250"/> <img src="results/windy_return_cdf_new_more_seeds_ptdqn_mhd-crop.png" alt="Gymansium Normalized Returns" height="250"/></p>
+<p align="center"><img src="results/overview.png" alt="Distribution of GPT-4o one-shot scores" height="200"/> <img src="results/windy_return_cdf_new_more_seeds_ptdqn_mhd-crop.png" alt="Gymansium Normalized Returns" height="200"/></p>
 
 
 ## Reproducing Evaluations
