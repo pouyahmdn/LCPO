@@ -1,6 +1,6 @@
 import pickle
 
-import gym
+import gymnasium as gym
 from termcolor import colored
 import torch
 from argparse import Namespace

@@ -1,5 +1,5 @@
-import gym
-from gym import Wrapper
+import gymnasium as gym
+from gymnasium import Wrapper
 import numpy as np
 
 

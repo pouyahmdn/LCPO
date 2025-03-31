@@ -1,5 +1,5 @@
 from collections import deque
-import gym
+import gymnasium as gym
 import numpy as np
 
 
